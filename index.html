@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>To-Do List</title>
+    <style>
+        h1 {
+            width: 500px;
+            text-align: center;
+            font-family: Arial;
+        }
+        #task-list {
+            list-style-type:none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            width: 400px;
+        }
+        #input-task {
+            width: 400px;
+            height: 50px;
+            border: none;
+            border-bottom: 2px solid mediumpurple;
+        }
+        #add-task-button {
+            background-color: mediumpurple;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+        .task {
+            font-family: Arial;
+            font-size: medium;
+        }
+        li {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body onload="restoreTasks()">
+    <h1>To-Do List</h1>
+    <input id="input-task" type="text">
+    <button id="add-task-button">ADD TASK</button>
+    <ul id="task-list">
+    </ul>
+<script>
+    document.getElementById("add-task-button").addEventListener("click", function () {
+        let taskStr = document.getElementById("input-task").value;
+        if (taskStr.length > 0) {
+            let ul = document.getElementById("task-list");
+            let li = document.createElement("li");
+            let input = document.createElement("input");
+            input.type = "checkbox";
+            input.setAttribute("onclick", "applyStyle(this)");
+            let span = document.createElement("span");
+            span.className = "task";
+            span.textContent = taskStr;
+            let anchor = document.createElement("a");
+            anchor.href = "#";
+            anchor.setAttribute("onclick", "removeTask(this)");
+            let button = document.createElement("button");
+            button.className = "delete-btn";
+            button.textContent = "Delete";
+            anchor.appendChild(button);
+            li.appendChild(input);
+            li.appendChild(span);
+            li.appendChild(anchor);
+            let newLi = ul.appendChild(li);
+            newLi.style.fontFamily = "Arial";
+            newLi.style.fontSize = "medium";
+            newLi.style.display = "flex";
+            newLi.style.justifyContent = "space-around";
+            newLi.style.padding = "10px";
+            document.getElementById("input-task").value = "";
+            saveTasks();
+        } else {
+            alert("Task cannot be empty!");
+            return;
+        }
+    });
+
+    function applyStyle(link) {
+        let checkbox = link;
+        let liElement = link.parentNode;
+        let spanNode = liElement.querySelector(".task");
+        if (checkbox.checked) {
+            checkbox.checked = true;
+            spanNode.style.textDecoration = "line-through";
+        } else {
+            checkbox.checked = false;
+            spanNode.style.textDecoration = "none";
+        }
+        saveTasks();
+    }
+
+    function removeTask(link) {
+        link.parentNode.parentNode.removeChild(link.parentNode);
+        saveTasks();
+    }
+
+    function saveTasks() {
+        let tasks = [];
+        let list = document.getElementById("task-list");
+        let listItems = list.getElementsByTagName("li");
+        let x;
+        for (x = 0; x < listItems.length; x++) {
+            tasks.push(listItems[x].innerHTML);
+        }
+        localStorage.setItem("tasks", JSON.stringify(tasks))
+    }
+
+    function restoreTasks() {
+        let list = document.getElementById("task-list");
+        let taskList = JSON.parse(localStorage.getItem("tasks")) || [];
+        let elem = 0;
+        for (elem in taskList) {
+            let li = document.createElement("li");
+            li.innerHTML = taskList[elem];
+            let nodes = li.childNodes;
+            let index;
+            let checkBoxChecked = false;
+            for (index = 0; index < nodes.length; index++) {
+                let spn = document.createElement("span");
+                if (nodes[index] instanceof HTMLSpanElement) {
+                    spn = nodes[index];
+                    if(spn.style.getPropertyValue("text-decoration") === "line-through")
+                    {
+                      checkBoxChecked = true;
+                    }
+                }
+            }
+            if (checkBoxChecked) {
+                li.getElementsByTagName("input")[0].checked = true;
+            }
+            list.appendChild(li);
+        }
+    }
+</script>
+</body>
+</html>
